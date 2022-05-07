@@ -1,0 +1,21 @@
+{
+  "id": "4aa543f1-5a5b-9609-b3dc-8ea2feca8e52",
+  "data": {
+    "properties": {},
+    "systemProperties": {
+      "iothub-content-type": "application/json",
+      "iothub-content-encoding": "utf-8",
+      "iothub-connection-device-id": "pinUpload",
+      "iothub-connection-auth-method": "{\"scope\":\"device\",\"type\":\"sas\",\"issuer\":\"iothub\",\"acceptingIpFilterRule\":null}",
+      "iothub-connection-auth-generation-id": "637871374240330552",
+      "iothub-enqueuedtime": "2022-05-04T00:09:34.359Z",
+      "iothub-message-source": "Telemetry"
+    },
+    "body": {
+      "pin": "1234"
+    }
+  },
+  "topic": "/SUBSCRIPTIONS/29042FCF-931E-492C-BF74-E8FB095EAFAB/RESOURCEGROUPS/PROJECT/PROVIDERS/MICROSOFT.DEVICES/IOTHUBS/SECURITYHUB",
+  "subject": "devices/pinUpload",
+  "event_type": "Microsoft.Devices.DeviceTelemetry"
+}

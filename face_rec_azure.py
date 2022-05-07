@@ -19,76 +19,77 @@ from azure.cognitiveservices.vision.face.models import TrainingStatusType, Perso
 
 # Create an authenticated FaceClient.
 face_client = FaceClient(
-    cred.ENDPOINT, 
+    cred.ENDPOINT,
     CognitiveServicesCredentials(cred.KEY)
-  )
+)
+
 
 def generatePersonGroupID(instanceID):
-  return instanceID
+    return instanceID
 
-def createPersonGroup(groupID = 'og', face_client = face_client):
-  face_client.person_group.create(
-    person_group_id=groupID, name=groupID, recognition_model='recognition_04'
-  )
 
-def createPerson(personID, groupID='og', face_client = face_client):
-  return face_client.person_group_person.create(groupID, personID)
-
-def addImageToPerson(person, groupID='og', face_client = face_client):
-  images = [file for file 
-    in glob.glob(groupID + '/*') 
-    if file.startswith(groupID + '/' + person.name)]
-  
-  print(images)
-  
-  for img in images:
-    with open(img, 'rb') as img_stream:
-      face_client.person_group_person.add_face_from_stream(groupID, person.person_id, img_stream)
-      print(img)
-
-def trainModel(groupID='og'):
-  # train
-  face_client.person_group.train(groupID)
-  while(True):
-    # wait for status
-    training_status = face_client.person_group.get_training_status(groupID)
-    print("Training status: {}.".format(training_status.status))
-    print()
-
-    if (training_status.status is TrainingStatusType.succeeded):
-      break
-    elif (training_status.status is TrainingStatusType.failed):
-        face_client.person_group.delete(person_group_id=groupID)
-        sys.exit('Training the person group has failed.')
-    time.sleep(5)
-
-def identifyFace(image_stream, groupID='og', accepted_confidence = 0.75):
-  # Detect faces
-  face_ids = []
-  # We use detection model 3 to get better performance, recognition model 4 to support quality for recognition attribute.
-  faces = face_client.face.detect_with_stream(
-    image_stream, 
-    detection_model='detection_03', 
-    recognition_model='recognition_04', 
-    return_face_attributes=['qualityForRecognition']
+def createPersonGroup(groupID='og', face_client=face_client):
+    face_client.person_group.create(
+        person_group_id=groupID, name=groupID, recognition_model='recognition_04'
     )
 
-  for face in faces:
-      # Only take the face if it is of sufficient quality.
-      if (
-        face.face_attributes.quality_for_recognition == QualityForRecognition.high or 
-        face.face_attributes.quality_for_recognition == QualityForRecognition.medium):
-          face_ids.append(face.face_id)
-  
-  results = face_client.face.identify(face_ids, groupID)
 
-  return [person for person 
-    in results
-    if len(person.candidates) > 0 
-    and person.candidates[0].confidence > accepted_confidence]
+def createPerson(personID, groupID='og', face_client=face_client):
+    return face_client.person_group_person.create(groupID, personID)
 
 
-  
+def addImageToPerson(person, groupID='og', face_client=face_client):
+    images = [file for file
+              in glob.glob(groupID + '/*')
+              if file.startswith(groupID + '/' + person.name)]
+
+    print(images)
+
+    for img in images:
+        with open(img, 'rb') as img_stream:
+            face_client.person_group_person.add_face_from_stream(
+                groupID, person.person_id, img_stream)
+            print(img)
 
 
-  
+def trainModel(groupID='og'):
+    # train
+    face_client.person_group.train(groupID)
+    while(True):
+        # wait for status
+        training_status = face_client.person_group.get_training_status(groupID)
+        print("Training status: {}.".format(training_status.status))
+        print()
+
+        if (training_status.status is TrainingStatusType.succeeded):
+            break
+        elif (training_status.status is TrainingStatusType.failed):
+            face_client.person_group.delete(person_group_id=groupID)
+            sys.exit('Training the person group has failed.')
+        time.sleep(5)
+
+
+def identifyFace(image_stream, groupID='og', accepted_confidence=0.75):
+    # Detect faces
+    face_ids = []
+    # We use detection model 3 to get better performance, recognition model 4 to support quality for recognition attribute.
+    faces = face_client.face.detect_with_stream(
+        image_stream,
+        detection_model='detection_03',
+        recognition_model='recognition_04',
+        return_face_attributes=['qualityForRecognition']
+    )
+
+    for face in faces:
+        # Only take the face if it is of sufficient quality.
+        if (
+                face.face_attributes.quality_for_recognition == QualityForRecognition.high or
+                face.face_attributes.quality_for_recognition == QualityForRecognition.medium):
+            face_ids.append(face.face_id)
+
+    results = face_client.face.identify(face_ids, groupID)
+
+    return [person for person
+            in results
+            if len(person.candidates) > 0
+            and person.candidates[0].confidence > accepted_confidence]

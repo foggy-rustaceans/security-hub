@@ -1,0 +1,2 @@
+azure-iot-hub
+azure-cosmos
