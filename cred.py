@@ -1,5 +1,5 @@
 # This key will serve all examples in this document.
-KEY = "PASTE_YOUR_FACE_SUBSCRIPTION_KEY_HERE"
+KEY = "acd2fa6813bc417b9a9085bf266685d3"
 
 # This endpoint will be used in all examples in this quickstart.
-ENDPOINT = "PASTE_YOUR_FACE_ENDPOINT_HERE"
+ENDPOINT = "https://securityface.cognitiveservices.azure.com/"

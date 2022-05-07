@@ -26,22 +26,27 @@ face_client = FaceClient(
 def generatePersonGroupID(instanceID):
   return instanceID
 
-def createPersonGroup(groupID, face_client):
-  face_client.person_group.create(person_group_id=groupID, name=groupID)
+def createPersonGroup(groupID = 'og', face_client = face_client):
+  face_client.person_group.create(
+    person_group_id=groupID, name=groupID, recognition_model='recognition_04'
+  )
 
-def createPerson(personID, groupID, face_client):
-  face_client.person_group_person.create(groupID, personID)
+def createPerson(personID, groupID='og', face_client = face_client):
+  return face_client.person_group_person.create(groupID, personID)
 
-def addImageToPerson(personID, groupID, face_client):
+def addImageToPerson(person, groupID='og', face_client = face_client):
   images = [file for file 
-    in glob.glob('*') 
-    if file.startswith(groupID+'/'+personID)]
+    in glob.glob(groupID + '/*') 
+    if file.startswith(groupID + '/' + person.name)]
+  
+  print(images)
   
   for img in images:
     with open(img, 'rb') as img_stream:
-      face_client.person_group_person.add_face_from_stream(groupID, personID, img_stream)
+      face_client.person_group_person.add_face_from_stream(groupID, person.person_id, img_stream)
+      print(img)
 
-def trainModel(groupID):
+def trainModel(groupID='og'):
   # train
   face_client.person_group.train(groupID)
   while(True):
@@ -57,7 +62,7 @@ def trainModel(groupID):
         sys.exit('Training the person group has failed.')
     time.sleep(5)
 
-def identifyFace(image_stream, groupID, accepted_confidence = 0.75):
+def identifyFace(image_stream, groupID='og', accepted_confidence = 0.75):
   # Detect faces
   face_ids = []
   # We use detection model 3 to get better performance, recognition model 4 to support quality for recognition attribute.
@@ -80,7 +85,7 @@ def identifyFace(image_stream, groupID, accepted_confidence = 0.75):
   return [person for person 
     in results
     if len(person.candidates) > 0 
-    and person.camdidates[0].confidence > accepted_confidence]
+    and person.candidates[0].confidence > accepted_confidence]
 
 
   
