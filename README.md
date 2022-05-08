@@ -10,4 +10,6 @@ We plan to use a hub architecture that utilizes proof-carrying actuation similar
  ```
   python -m pip install Pillow
   pip install --upgrade azure-cognitiveservices-vision-face
+  # blob storage
+  pip install azure-storage-blob
  ```
