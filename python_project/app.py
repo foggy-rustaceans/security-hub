@@ -101,6 +101,7 @@ def run_sample(photo_device, path):
 
     # Get the storage info for the blob
     blob_name = os.path.basename(path)
+    print(blob_name)
     storage_info = photo_device.get_storage_info_for_blob(blob_name)
 
     # Upload to blob
