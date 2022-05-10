@@ -19,8 +19,8 @@ CONNECTION_STRING = "HostName=SecurityHub.azure-devices.net;DeviceId=imageUpload
 PIN_CONNECTION_STRING = "HostName=SecurityHub.azure-devices.net;DeviceId=pinUpload;SharedAccessKey=IBWPe06RbaJ1xgOhKhgQ54rHQi08sWv9IF3fa1yRG4Q="
 ACCESS_CONNECTION_STRING = "HostName=SecurityHub.azure-devices.net;DeviceId=accessControl;SharedAccessKey=WTnBv7+1SgRsFOHC9LANtTcipfyrvpGgKe5sBgFFWfg="
 
-ACCESS_COLOR = "red"
-ACCESS_MESSAGE = "ACCESS DENIED"
+ACCESS_COLOR = "grey"
+ACCESS_MESSAGE = "NO ACCESS"
 
 DEFAULT_HEIGHT = 300
 
@@ -138,8 +138,11 @@ def run_sample(photo_device, path):
 def show():
     global ACCESS_COLOR
     global ACCESS_MESSAGE
-    ACCESS_COLOR = 'red'
-    ACCESS_MESSAGE = 'ACCESS DENIED'
+    ACCESS_COLOR = 'grey'
+    ACCESS_MESSAGE = 'NO ACCESS'
+    my_img = ImageTk.PhotoImage(resize(Image.open("./default.png")))
+    my_label.configure(image=my_img)
+    my_label.image = my_img
 
 
 myButton = Button(frame_left, text='Upload Image', command=myClick)
@@ -192,13 +195,28 @@ entry_label.pack()
 
 
 def method_request_handler(method_request):
+    global ACCESS_COLOR
+    global ACCESS_MESSAGE
     if method_request.name == "grantAccess":
         try:
             print(method_request.name)
-            global ACCESS_COLOR
             ACCESS_COLOR = "Green"
-            global ACCESS_MESSAGE
             ACCESS_MESSAGE = "ACCESS GRANTED"
+            # entry_label.config(text="ACCESS GRANTED")
+        except ValueError:
+            print("here 1")
+            response_payload = {"Response": "Invalid parameter"}
+            response_status = 400
+        else:
+            print("here 2")
+            response_payload = {
+                "Response": "Executed direct method {}".format(method_request.name)}
+            response_status = 200
+    elif method_request.name == "denyAccess":
+        try:
+            print(method_request.name)
+            ACCESS_COLOR = "red"
+            ACCESS_MESSAGE = "ACCESS DENIED"
             # entry_label.config(text="ACCESS GRANTED")
         except ValueError:
             print("here 1")
