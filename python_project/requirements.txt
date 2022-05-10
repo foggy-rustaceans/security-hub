@@ -1,3 +1,4 @@
 azure_storage==0.37.0
 Pillow==9.1.0
+pytz==2020.1
 tkcalendar==1.6.1
