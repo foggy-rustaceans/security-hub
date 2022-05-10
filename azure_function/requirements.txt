@@ -1,2 +1,7 @@
 azure-iot-hub
 azure-cosmos
+datetime
+msrest
+azure-storage-blob
+azure-cognitiveservices-vision-face
+scipy

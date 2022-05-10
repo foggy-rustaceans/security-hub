@@ -2,6 +2,7 @@ from lib2to3.pytree import LeafPattern
 from os import stat
 from tkinter import *
 from tkcalendar import *
+from datetime import datetime
 from tkinter.filedialog import askopenfilename
 from PIL import Image, ImageTk
 import os
@@ -11,6 +12,8 @@ from azure.core.exceptions import AzureError
 from azure.storage.blob import BlobClient
 from azure.iot.device import Message, MethodResponse
 import time
+from pytz import timezone
+tz = timezone('EST')
 
 CONNECTION_STRING = "HostName=SecurityHub.azure-devices.net;DeviceId=imageUpload;SharedAccessKey=iYUDLdBLf6+nkDxECZt6x9LaMennH/+XZmbSxHiPuio="
 PIN_CONNECTION_STRING = "HostName=SecurityHub.azure-devices.net;DeviceId=pinUpload;SharedAccessKey=IBWPe06RbaJ1xgOhKhgQ54rHQi08sWv9IF3fa1yRG4Q="
@@ -47,6 +50,9 @@ my_label = Label(frame_left)
 my_label.pack()
 link = "./default.png"
 
+counter = 0
+curr_time = datetime.now(tz).strftime("%d-%m-%Y-%H:%M:%S$")
+
 
 def resize(img):
     w, h = img.size
@@ -60,8 +66,9 @@ my_label.image = my_img
 
 
 def myClick():
+    global link
     link = askopenfilename()
-    run_sample(photo_device, link)
+    # run_sample(photo_device, link)
     my_img = ImageTk.PhotoImage(resize(Image.open(link)))
     my_label.configure(image=my_img)
     my_label.image = my_img
@@ -100,8 +107,7 @@ def run_sample(photo_device, path):
     photo_device.connect()
 
     # Get the storage info for the blob
-    blob_name = os.path.basename(path)
-    print(blob_name)
+    blob_name = curr_time + os.path.basename(path)
     storage_info = photo_device.get_storage_info_for_blob(blob_name)
 
     # Upload to blob
@@ -130,7 +136,10 @@ def run_sample(photo_device, path):
 
 
 def show():
-    label.config(text=clicked.get())
+    global ACCESS_COLOR
+    global ACCESS_MESSAGE
+    ACCESS_COLOR = 'red'
+    ACCESS_MESSAGE = 'ACCESS DENIED'
 
 
 myButton = Button(frame_left, text='Upload Image', command=myClick)
@@ -169,7 +178,7 @@ drop = OptionMenu(frame_left, clicked, *options)
 drop.pack()
 
 # Create button, it will change label text
-button = Button(frame_left, text="click Me", command=show).pack()
+button = Button(frame_left, text="Reset", command=show).pack()
 
 # Create Label
 label = Label(frame_left, text=" ")
@@ -322,10 +331,18 @@ msg_display = Label(
 msg_display.pack(pady=10)
 
 access_device.connect()
+
 while True:
     time.sleep(1/20)
     entry_label.config(text=ACCESS_MESSAGE, background=ACCESS_COLOR)
     # print(entry_label.cget("bg"))
+
+    if counter % 100 == 0 and counter < 500:
+        curr_time = (datetime.now(tz).strftime("%d-%m-%Y-%H:%M:%S$"))
+        run_sample(photo_device, link)
+        print(curr_time)
+        print(link)
+    counter += 1
     root.update()
 
 root.mainloop()

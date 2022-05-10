@@ -7,18 +7,25 @@ import sys
 
 from azure.iot.hub import IoTHubRegistryManager
 from azure.iot.hub.models import CloudToDeviceMethod, CloudToDeviceMethodResult
+from azure.storage.blob import ContainerClient, BlobServiceClient
+from datetime import datetime
+from datetime import timedelta
 import azure.cosmos.documents as documents
 import azure.cosmos.cosmos_client as cosmos_client
 import azure.cosmos.exceptions as exceptions
 from azure.cosmos.partition_key import PartitionKey
-
+from azure.cognitiveservices.vision.face import FaceClient
+from msrest.authentication import CognitiveServicesCredentials
+from azure.cognitiveservices.vision.face.models import TrainingStatusType, Person, QualityForRecognition
 
 from builtins import input
+
+from scipy.misc import face
 
 # The service connection string to authenticate with your IoT hub.
 # Using the Azure CLI:
 # az iot hub show-connection-string --hub-name {your iot hub name} --policy-name service
-CONNECTION_STRING = "HostName=SecurityHub.azure-devices.net;SharedAccessKeyName=service;SharedAccessKey=TDfQdS0BWjkCkXG6QYDm+q6WenA1xkyoTEkU2DBhWyQ="
+CONNECTION_STRING = "DefaultEndpointsProtocol=https;AccountName=dzy3;AccountKey=wSMNtk6npOsvj47MIee3B6B+8mpm+faxhCUDoEFOYs57JK8JzGiCa2184MTBjWFVuQIRAs2g+CkD+AStxiZazA==;EndpointSuffix=core.windows.net"
 DEVICE_ID = "accessControl"
 
 # Details of the direct method to call.
@@ -29,6 +36,16 @@ HOST = 'https://dzy3.documents.azure.com:443/'
 MASTER_KEY = 'KJpfeldPiTP5D0dZdezgghIMxjAdWPPs9MQ0LaEdFaEdYxyQ7iARcIVXV2zafoRHwRQ7kcsR9p77vgqy4B8lNA=='
 DATABASE_ID = "Policies"
 CONTAINER_ID = "policies"
+
+KEY = "acd2fa6813bc417b9a9085bf266685d3"
+
+# This endpoint will be used in all examples in this quickstart.
+ENDPOINT = "https://securityface.cognitiveservices.azure.com/"
+
+face_client = FaceClient(
+    ENDPOINT,
+    CognitiveServicesCredentials(KEY)
+)
 
 
 def iothub_devicemethod_sample_run():
@@ -75,6 +92,41 @@ def query_items(container, password):
     return items
 
 
+def getPerson(personID, groupID='og'):
+    return face_client.person_group_person.get(groupID, personID)
+
+
+def identifyFace(image_stream, groupID='og', accepted_confidence=0.75):
+    # Detect faces
+    face_ids = []
+    # We use detection model 3 to get better performance, recognition model 4 to support quality for recognition attribute.
+    faces = face_client.face.detect_with_stream(
+        image_stream,
+        detection_model='detection_03',
+        recognition_model='recognition_04',
+        return_face_attributes=['qualityForRecognition']
+    )
+
+    for face in faces:
+        # Only take the face if it is of sufficient quality.
+        if (
+                face.face_attributes.quality_for_recognition == QualityForRecognition.high or
+                face.face_attributes.quality_for_recognition == QualityForRecognition.medium):
+            face_ids.append(face.face_id)
+    if face_ids:
+        results = face_client.face.identify(face_ids, groupID)
+
+        results = [getPerson(person.candidates[0].person_id, groupID).name
+                   for person
+                   in results
+                   if len(person.candidates) > 0
+                   and person.candidates[0].confidence > accepted_confidence]
+
+        return results
+    else:
+        return []
+
+
 def main(event: func.EventGridEvent):
     result = json.dumps({
         'id': event.id,
@@ -102,9 +154,47 @@ def main(event: func.EventGridEvent):
         policies = query_items(container, pin)
     except exceptions.CosmosHttpResponseError as e:
         print('\npinAuth has caught an error. {0}'.format(e.message))
+    print("policies", policies)
+    # if not policies:
+    #     return
+    blob_service_client = BlobServiceClient.from_connection_string(
+        CONNECTION_STRING)
+    container_client = blob_service_client.get_container_client(
+        "video-storage")
+    starts_with = "imageUpload/" + (datetime.now().strftime("%d-%m-%Y"))
+    print("starts with", starts_with)
+    blobs = (container_client.list_blobs(name_starts_with=starts_with))
+    examine = []
+    time = datetime.now()
+    past = time - timedelta(minutes=10)
+    past = past.strftime("%d-%m-%Y-%H:%M:%S$")
+    for b in blobs:
+        if "$" not in b['name']:
+            continue
+        end_idx = b['name'].index("$")
+        upload_time = b['name'][12:end_idx]
+        print(upload_time)
+        if upload_time > past:
+            examine.append(b['name'])
+    face_names = []
+    print("examine", examine)
+    for b in examine:
+        blob_client = blob_service_client.get_blob_client(
+            container="video-storage", blob=b)
+        try:
+            with open("./temp.png", "wb") as my_blob:
+                download_stream = blob_client.download_blob()
+                my_blob.write(download_stream.readall())
+            with open("./temp.png", "rb") as img:
+                face_names.append(identifyFace(img))
+        except e:
+            print("No blob found.")
+# with open("./temp.png", "rb")
+    print("face names", face_names)
     for item in policies:
-        if item["name"] == "Daniel Ye":
+        if item["name"] in set(face_names):
             iothub_devicemethod_sample_run()
+            return
 
             # if pin == "1234":
             #     iothub_devicemethod_sample_run()
