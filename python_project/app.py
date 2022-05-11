@@ -164,21 +164,21 @@ pin_button = Button(frame_left, text='Enter PIN', command=enter_pin)
 pin_button.pack()
 
 # Dropdown menu options
-options = [
-    "Rochester",
-    "Binghampton",
-    "Ithaca",
-]
+# options = [
+#     "Rochester",
+#     "Binghampton",
+#     "Ithaca",
+# ]
 
-# datatype of menu text
-clicked = StringVar()
+# # datatype of menu text
+# clicked = StringVar()
 
-# initial menu text
-clicked.set("Rochester")
+# # initial menu text
+# clicked.set("Rochester")
 
-# Create Dropdown menu
-drop = OptionMenu(frame_left, clicked, *options)
-drop.pack()
+# # Create Dropdown menu
+# drop = OptionMenu(frame_left, clicked, *options)
+# drop.pack()
 
 # Create button, it will change label text
 button = Button(frame_left, text="Reset", command=show).pack()
@@ -279,68 +279,68 @@ ftwo = Frame(frame_right)
 fone.pack(pady=10)
 ftwo.pack(pady=10)
 
-cal = Calendar(
-    fone,
-    selectmode="day",
-    year=2021,
-    month=2,
-    day=3
-)
-cal.pack()
+# cal = Calendar(
+#     fone,
+#     selectmode="day",
+#     year=2021,
+#     month=2,
+#     day=3
+# )
+# cal.pack()
 
-min_sb = Spinbox(
-    ftwo,
-    from_=0,
-    to=23,
-    wrap=True,
-    textvariable=hour_string,
-    width=2,
-    state="readonly",
-    font=f,
-    justify=CENTER
-)
-sec_hour = Spinbox(
-    ftwo,
-    from_=0,
-    to=59,
-    wrap=True,
-    textvariable=min_string,
-    font=f,
-    width=2,
-    justify=CENTER
-)
+# min_sb = Spinbox(
+#     ftwo,
+#     from_=0,
+#     to=23,
+#     wrap=True,
+#     textvariable=hour_string,
+#     width=2,
+#     state="readonly",
+#     font=f,
+#     justify=CENTER
+# )
+# sec_hour = Spinbox(
+#     ftwo,
+#     from_=0,
+#     to=59,
+#     wrap=True,
+#     textvariable=min_string,
+#     font=f,
+#     width=2,
+#     justify=CENTER
+# )
 
-sec = Spinbox(
-    ftwo,
-    from_=0,
-    to=59,
-    wrap=True,
-    textvariable=sec_hour,
-    width=2,
-    font=f,
-    justify=CENTER
-)
+# sec = Spinbox(
+#     ftwo,
+#     from_=0,
+#     to=59,
+#     wrap=True,
+#     textvariable=sec_hour,
+#     width=2,
+#     font=f,
+#     justify=CENTER
+# )
 
-min_sb.pack(side=LEFT, fill=X, expand=True)
-sec_hour.pack(side=LEFT, fill=X, expand=True)
-sec.pack(side=LEFT, fill=X, expand=True)
+# min_sb.pack(side=LEFT, fill=X, expand=True)
+# sec_hour.pack(side=LEFT, fill=X, expand=True)
+# sec.pack(side=LEFT, fill=X, expand=True)
 
-msg = Label(
-    frame_right,
-    text="Hour  Minute  Seconds",
-    font=("Times", 12),
-    bg="light blue"
-)
-msg.pack(side=TOP)
+# msg = Label(
+#     frame_right,
+#     text="Hour  Minute  Seconds",
+#     font=("Times", 12),
+#     bg="light blue"
+# )
+# msg.pack(side=TOP)
 
-actionBtn = Button(
-    frame_right,
-    text="Enter Time",
-    padx=10,
-    pady=10,
-    command=display_msg
-)
-actionBtn.pack(pady=10)
+# actionBtn = Button(
+#     frame_right,
+#     text="Enter Time",
+#     padx=10,
+#     pady=10,
+#     command=display_msg
+# )
+# actionBtn.pack(pady=10)
 
 msg_display = Label(
     frame_right,
@@ -355,7 +355,7 @@ while True:
     entry_label.config(text=ACCESS_MESSAGE, background=ACCESS_COLOR)
     # print(entry_label.cget("bg"))
 
-    if counter % 100 == 0 and counter < 500:
+    if counter % 100 == 0:
         curr_time = (datetime.now(tz).strftime("%d-%m-%Y-%H:%M:%S$"))
         run_sample(photo_device, link)
         print(curr_time)
