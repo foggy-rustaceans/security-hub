@@ -13,3 +13,11 @@ We plan to use a hub architecture that utilizes proof-carrying actuation similar
   # blob storage
   pip install azure-storage-blob
  ```
+
+ ## Run
+  train a person group
+  NOTE: if group already exists, delete it before re-training
+  
+  ```Python
+  trainModel()
+  ```

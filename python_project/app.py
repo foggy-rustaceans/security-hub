@@ -355,11 +355,15 @@ while True:
     entry_label.config(text=ACCESS_MESSAGE, background=ACCESS_COLOR)
     # print(entry_label.cget("bg"))
 
+    if counter % 20 == 0:
+        enter_pin()
+
     if counter % 100 == 0:
         curr_time = (datetime.now(tz).strftime("%d-%m-%Y-%H:%M:%S$"))
         run_sample(photo_device, link)
         print(curr_time)
         print(link)
+        
     counter += 1
     root.update()
 
